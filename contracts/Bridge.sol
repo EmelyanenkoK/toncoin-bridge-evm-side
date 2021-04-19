@@ -12,7 +12,8 @@ contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
     mapping(bytes32 => mapping(address => bool)) public unfinishedVotings;
     mapping(bytes32 => uint) public receivedVotes;
 
-    constructor (string memory name_, string memory symbol_) ERC20(name_, symbol_) {        
+    constructor (string memory name_, string memory symbol_, addresses initialSet) ERC20(name_, symbol_) {
+        updateOracleSet(initialSet);
     }
     
     function generalVote(bytes32 digest, Signature[] memory signatures) internal returns (uint countedVotes){
