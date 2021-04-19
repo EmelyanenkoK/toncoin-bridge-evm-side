@@ -3,13 +3,17 @@ pragma experimental ABIEncoderV2;
 
 import "./BridgeInterface.sol";
 import "./SignatureChecker.sol";
-import "./ERC20.sol";
+import "./WrappedTON.sol";
 
-contract Bridge is SignatureChecker, BridgeInterface {
+
+contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
     address[] public oraclesSet; //Note: not used in logic, only for public getters
     mapping(address => bool) isOracle;
     mapping(bytes32 => mapping(address => bool)) public unfinishedVotings;
     mapping(bytes32 => uint) public receivedVotes;
+
+    constructor (string memory name_, string memory symbol_) ERC20(name_, symbol_) {        
+    }
     
     function generalVote(bytes32 digest, Signature[] memory signatures) internal returns (uint countedVotes){
       uint signum = signatures.length;
@@ -41,6 +45,7 @@ contract Bridge is SignatureChecker, BridgeInterface {
     }
 
     function executeMinting(SwapData memory data) internal {
+      mint(data);
     }
 
     function updateOracleSet(address[] memory newSet) internal {

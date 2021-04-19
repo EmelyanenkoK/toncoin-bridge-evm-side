@@ -5,7 +5,7 @@ import "./TonUtils.sol";
 
 contract SignatureChecker is TonUtils {
 
-    function checkSignature(bytes32 digest, Signature memory sig) public view {
+    function checkSignature(bytes32 digest, Signature memory sig) public pure {
           if (sig.signature.length != 65) {
               revert("ECDSA: invalid signature length");
           }
