@@ -11,8 +11,9 @@ contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
     mapping(address => bool) isOracle;
     mapping(bytes32 => mapping(address => bool)) public unfinishedVotings;
     mapping(bytes32 => uint) public receivedVotes;
+    mapping(bytes32 => bool) public finishedVotings;
 
-    constructor (string memory name_, string memory symbol_, addresses initialSet) ERC20(name_, symbol_) {
+    constructor (string memory name_, string memory symbol_, address[] memory initialSet) ERC20(name_, symbol_) {
         updateOracleSet(initialSet);
     }
     
@@ -32,16 +33,20 @@ contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
     }
 
     function voteForMinting(SwapData memory data, Signature[] memory signatures) override public {
-      uint countedVotes = generalVote(getSwapDataId(data), signatures);
-      if( countedVotes >= 2 * oraclesSet.length / 3 ) {
+      bytes32 _id = getSwapDataId(data);
+      uint countedVotes = generalVote(_id, signatures);
+      if( countedVotes >= 2 * oraclesSet.length / 3 && !finishedVotings[_id]) {
           executeMinting(data);
+          finishedVotings[_id] = true;
       }
     }
 
     function voteForNewOracleSet(address[] memory newOracles, Signature[] memory signatures) override  public {
-      uint countedVotes = generalVote(getNewSetId(newOracles), signatures);
-      if( countedVotes >= 2 * oraclesSet.length / 3 ) {
+      bytes32 _id = getNewSetId(newOracles);
+      uint countedVotes = generalVote(_id, signatures);
+      if( countedVotes >= 2 * oraclesSet.length / 3 && !finishedVotings[_id]) {
           updateOracleSet(newOracles);
+          finishedVotings[_id] = true;
       }
     }
 
