@@ -36,8 +36,9 @@ contract SignatureChecker is TonUtils {
           if (v != 27 && v != 28) {
               revert("ECDSA: invalid signature 'v' value");
           }
-
-          require(ecrecover(digest, v, r, s) == sig.signer);
+          bytes memory prefix = "\x19Ethereum Signed Message:\n32";
+          bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, digest));
+          require(ecrecover(prefixedHash, v, r, s) == sig.signer, "Wrong signature");
     }
 
     function getSwapDataId(SwapData memory data)

@@ -34,9 +34,15 @@ abstract contract WrappedTON is ERC20, TonUtils {
      * `amount`.
      */
     function burnFrom(address account, uint256 amount, TonAddress memory addr) external {
-        decreaseAllowance(account, amount);
+        uint256 currentAllowance = allowance(account,msg.sender);
+        require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
+        _approve(account, msg.sender, currentAllowance - amount);
         _burn(account, amount);
         emit SwapEthToTON(account, addr, amount);
+    }
+
+    function decimals() public pure override returns (uint8) {
+        return 9;
     }
 
     event SwapEthToTON(address indexed from, TonAddress indexed to, uint256 value);

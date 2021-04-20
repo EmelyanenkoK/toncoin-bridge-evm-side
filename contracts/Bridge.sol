@@ -8,7 +8,7 @@ import "./WrappedTON.sol";
 
 contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
     address[] public oraclesSet; //Note: not used in logic, only for public getters
-    mapping(address => bool) isOracle;
+    mapping(address => bool) public isOracle;
     mapping(bytes32 => mapping(address => bool)) public unfinishedVotings;
     mapping(bytes32 => uint) public receivedVotes;
     mapping(bytes32 => bool) public finishedVotings;
@@ -22,7 +22,7 @@ contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
       countedVotes = receivedVotes[digest];
       for(uint i=0; i<signum; i++) {
         address signer = signatures[i].signer;
-        require(isOracle[signer], "Unathorized signer");
+        require(isOracle[signer], "Unauthorized signer");
         checkSignature(digest, signatures[i]);
         if(!unfinishedVotings[digest][signer]) {
           countedVotes += 1;
