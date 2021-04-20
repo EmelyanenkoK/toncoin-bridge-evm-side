@@ -8,7 +8,7 @@ interface TonUtils {
     struct TonTxID {
         TonAddress address_;
         bytes32 tx_hash;
-        uint32 lt;
+        uint64 lt;
     }
 
   struct SwapData {

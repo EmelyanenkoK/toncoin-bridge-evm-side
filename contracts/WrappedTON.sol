@@ -9,7 +9,7 @@ abstract contract WrappedTON is ERC20, TonUtils {
 
     function mint(SwapData memory sd) internal {
       _mint(sd.receiver, sd.amount);
-      emit SwapTONToEth(sd.tx.address_.workchain, sd.tx.address_.address_hash, sd.tx.tx_hash, sd.tx.lt, sd.receiver, sd.amount);
+      emit SwapTonToEth(sd.tx.address_.workchain, sd.tx.address_.address_hash, sd.tx.tx_hash, sd.tx.lt, sd.receiver, sd.amount);
     }
 
     /**
@@ -19,7 +19,7 @@ abstract contract WrappedTON is ERC20, TonUtils {
      */
     function burn(uint256 amount, TonAddress memory addr) external {
       _burn(msg.sender, amount);
-      emit SwapEthToTON(msg.sender, addr, amount);
+      emit SwapEthToTon(msg.sender, addr, amount);
     }
 
     /**
@@ -38,13 +38,13 @@ abstract contract WrappedTON is ERC20, TonUtils {
         require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
         _approve(account, msg.sender, currentAllowance - amount);
         _burn(account, amount);
-        emit SwapEthToTON(account, addr, amount);
+        emit SwapEthToTon(account, addr, amount);
     }
 
     function decimals() public pure override returns (uint8) {
         return 9;
     }
 
-    event SwapEthToTON(address indexed from, TonAddress indexed to, uint256 value);
-    event SwapTONToEth(int8 workchain, bytes32 indexed ton_address_hash, bytes32 indexed ton_tx_hash, uint64 lt, address indexed to, uint256 value);
+    event SwapEthToTon(address indexed from, TonAddress indexed to, uint256 value);
+    event SwapTonToEth(int8 workchain, bytes32 indexed ton_address_hash, bytes32 indexed ton_tx_hash, uint64 lt, address indexed to, uint256 value);
 }

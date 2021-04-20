@@ -65,6 +65,7 @@ contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
         require(!isOracle[newSet[i]], "Duplicate oracle in Set");
         isOracle[newSet[i]] = true;
       }
+      emit NewOracleSet(newSet);
     }
     
 }
