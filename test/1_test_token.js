@@ -30,17 +30,6 @@ contract("WrappedTON", ([single_oracle, not_oracle, user, user2]) => {
   });
 
   describe("WrappedTON::simple_minting", () => {
-    it("check oracles", async () => {
-      // list
-      let first_oracle = await token.oraclesSet(0);
-      first_oracle.toString().should.be.equal(String(single_oracle));
-      await token.oraclesSet(1).should.be.rejected;
-      // mapping
-      isOracle = await token.isOracle(single_oracle);
-      isOracle.should.be.true;
-      isOracle = await token.isOracle(not_oracle);
-      isOracle.should.be.false;
-    });
     let prepareSwapData = function(receiver, amount, 
                                    tonaddress={workchain:-1, address_hash:"0x00"}, 
                                    tx_hash="0x00", lt=0) {
@@ -63,11 +52,6 @@ contract("WrappedTON", ([single_oracle, not_oracle, user, user2]) => {
         signature: signature
       }
     };
-    it("random address can't mint tokens", async () => {
-      let data = prepareSwapData(user, 1e9);
-      await token.voteForMinting(data, [await signData(data, not_oracle)], { from: not_oracle }).should.not.be.fulfilled;
-    });
-
     it("single oracle can mint tokens", async () => {
       let data = prepareSwapData(user, 1e9);
       let balance = await token.balanceOf(user);

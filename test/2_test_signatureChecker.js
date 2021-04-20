@@ -25,9 +25,12 @@ contract("SignatureChecker", ([oracle, not_oracle]) => {
          }
        }
     };
-    let encodeData = function(d) {
+    let encodeSwapData = function(d) {
       return web3.eth.abi.encodeParameters(['address', 'uint256', 'int8', 'bytes32', 'bytes32', 'uint64'],
         [d.receiver, d.amount, d.tx.address_.workchain, d.tx.address_.address_hash, d.tx.tx_hash, d.tx.lt]);
+    }
+    let encodeSet = function(set) {
+      return web3.eth.abi.encodeParameter('address[]',set);
     }
     let hashData = function(encoded) {
       return web3.utils.sha3(encoded)
@@ -62,10 +65,15 @@ contract("SignatureChecker", ([oracle, not_oracle]) => {
     });
     it("check correct swapData id generation", async () => {
       let data = prepareSwapData(not_oracle, 10);
-      let hash = hashData(encodeData(data));
+      let hash = hashData(encodeSwapData(data));
       let contractHash = await sigchecker.getSwapDataId(data);
       contractHash.toString().should.be.equal(String(hash));
     });
-
+    it("check correct oracleSet id generation", async () => {
+      let set = [oracle, not_oracle, oracle];
+      let hash = hashData(encodeSet(set));
+      let contractHash = await sigchecker.getNewSetId(set);
+      contractHash.toString().should.be.equal(String(hash));
+    });
   });
 });
