@@ -67,5 +67,7 @@ contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
       }
       emit NewOracleSet(newSet);
     }
-    
+    function getFullOracleSet() public view returns (address[] memory) {
+        return oraclesSet;
+    }
 }
