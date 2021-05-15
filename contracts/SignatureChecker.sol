@@ -49,6 +49,7 @@ contract SignatureChecker is TonUtils {
         result = 
             keccak256(
                 abi.encode(
+                    0xDA7A,
                     data.receiver,
                     data.amount,
                     data.tx.address_.workchain,
@@ -67,6 +68,7 @@ contract SignatureChecker is TonUtils {
         result = 
             keccak256(
                 abi.encode(
+                    0x5e7,
                     set                    
                 )
             );
