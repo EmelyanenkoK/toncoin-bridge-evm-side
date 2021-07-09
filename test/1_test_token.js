@@ -78,7 +78,17 @@ contract("WrappedTON", ([single_oracle, not_oracle, user, user2]) => {
   });
 
   describe("WrappedTON::burning", () => {
+    let signAllowBurn = async function(allow, nonce, account) {
+      let hash = await token.getNewBurnStatusId(allow, nonce);
+      signature =  await web3.eth.sign(hash, account);
+      signature = signature.slice(0, 2+2*64)+(parseInt(signature.slice(130),16)+27).toString(16);
+      return {
+        signer: account,
+        signature: signature
+      }
+    };
     it("user 1 can burn tokens", async () => {
+      await token.voteForSwitchBurn(true, 41, [await signAllowBurn(true, 41, single_oracle)], { from: not_oracle }).should.be.fulfilled;
       let initialBalance = await token.balanceOf(user);
       await token.burn("1000", {workchain:-1, address_hash:"0x00"}, { from: user }).should.be.fulfilled;
       let finalBalance = await token.balanceOf(user);

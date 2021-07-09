@@ -6,6 +6,7 @@ import "./TonUtils.sol";
 
 
 abstract contract WrappedTON is ERC20, TonUtils {
+    bool public allowBurn;
 
     function mint(SwapData memory sd) internal {
       _mint(sd.receiver, sd.amount);
@@ -18,6 +19,7 @@ abstract contract WrappedTON is ERC20, TonUtils {
      * See {ERC20-_burn}.
      */
     function burn(uint256 amount, TonAddress memory addr) external {
+      require(allowBurn, "Burn is currently disabled");
       _burn(msg.sender, amount);
       emit SwapEthToTon(msg.sender, addr.workchain, addr.address_hash, amount);
     }
@@ -34,6 +36,7 @@ abstract contract WrappedTON is ERC20, TonUtils {
      * `amount`.
      */
     function burnFrom(address account, uint256 amount, TonAddress memory addr) external {
+        require(allowBurn, "Burn is currently disabled");
         uint256 currentAllowance = allowance(account,msg.sender);
         require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
         _approve(account, msg.sender, currentAllowance - amount);

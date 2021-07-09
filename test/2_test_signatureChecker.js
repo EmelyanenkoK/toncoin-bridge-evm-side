@@ -26,11 +26,11 @@ contract("SignatureChecker", ([oracle, not_oracle]) => {
        }
     };
     let encodeSwapData = function(d) {
-      return web3.eth.abi.encodeParameters(['address', 'uint256', 'int8', 'bytes32', 'bytes32', 'uint64'],
-        [d.receiver, d.amount, d.tx.address_.workchain, d.tx.address_.address_hash, d.tx.tx_hash, d.tx.lt]);
+      return web3.eth.abi.encodeParameters(['int', 'address', 'uint256', 'int8', 'bytes32', 'bytes32', 'uint64'],
+        [0xDA7A, d.receiver, d.amount, d.tx.address_.workchain, d.tx.address_.address_hash, d.tx.tx_hash, d.tx.lt]);
     }
-    let encodeSet = function(set) {
-      return web3.eth.abi.encodeParameter('address[]',set);
+    let encodeSet = function(setHash, set) {
+      return web3.eth.abi.encodeParameters(['int', 'int', 'address[]'], [0x5E7, setHash, set]);
     }
     let hashData = function(encoded) {
       return web3.utils.sha3(encoded)
@@ -71,8 +71,8 @@ contract("SignatureChecker", ([oracle, not_oracle]) => {
     });
     it("check correct oracleSet id generation", async () => {
       let set = [oracle, not_oracle, oracle];
-      let hash = hashData(encodeSet(set));
-      let contractHash = await sigchecker.getNewSetId(set);
+      let hash = hashData(encodeSet(7, set));
+      let contractHash = await sigchecker.getNewSetId(7, set);
       contractHash.toString().should.be.equal(String(hash));
     });
   });

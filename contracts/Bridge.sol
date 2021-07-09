@@ -41,13 +41,23 @@ contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
       }
     }
 
-    function voteForNewOracleSet(address[] memory newOracles, Signature[] memory signatures) override  public {
-      bytes32 _id = getNewSetId(newOracles);
+    function voteForNewOracleSet(int oracleSetHash, address[] memory newOracles, Signature[] memory signatures) override  public {
+      bytes32 _id = getNewSetId(oracleSetHash, newOracles);
       uint countedVotes = generalVote(_id, signatures);
       if( countedVotes >= 2 * oraclesSet.length / 3 && !finishedVotings[_id]) {
           updateOracleSet(newOracles);
           finishedVotings[_id] = true;
       }
+    }
+
+    function voteForSwitchBurn(bool newBurnStatus, int nonce, Signature[] memory signatures) override public {
+      bytes32 _id = getNewBurnStatusId(newBurnStatus, nonce);
+      uint countedVotes = generalVote(_id, signatures);
+      if( countedVotes >= 2 * oraclesSet.length / 3 && !finishedVotings[_id]) {
+          allowBurn = newBurnStatus;
+          finishedVotings[_id] = true;
+      }
+
     }
 
     function executeMinting(SwapData memory data) internal {
