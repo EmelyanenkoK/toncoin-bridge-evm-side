@@ -7,17 +7,18 @@ import "./WrappedTON.sol";
 
 
 contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
-    address[] public oraclesSet; //Note: not used in logic, only for public getters
+    address[] public oraclesSet;
     mapping(address => bool) public isOracle;
     mapping(bytes32 => mapping(address => bool)) public unfinishedVotings;
     mapping(bytes32 => uint) public receivedVotes;
     mapping(bytes32 => bool) public finishedVotings;
 
     constructor (string memory name_, string memory symbol_, address[] memory initialSet) ERC20(name_, symbol_) {
-        updateOracleSet(initialSet);
+        updateOracleSet(0, initialSet);
     }
     
     function generalVote(bytes32 digest, Signature[] memory signatures) internal returns (uint countedVotes){
+      require(!finishedVotings[digest], "Vote is already finished");
       uint signum = signatures.length;
       countedVotes = receivedVotes[digest];
       for(uint i=0; i<signum; i++) {
@@ -35,7 +36,7 @@ contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
     function voteForMinting(SwapData memory data, Signature[] memory signatures) override public {
       bytes32 _id = getSwapDataId(data);
       uint countedVotes = generalVote(_id, signatures);
-      if( countedVotes >= 2 * oraclesSet.length / 3 && !finishedVotings[_id]) {
+      if( countedVotes >= 2 * oraclesSet.length / 3) {
           executeMinting(data);
           finishedVotings[_id] = true;
       }
@@ -43,9 +44,10 @@ contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
 
     function voteForNewOracleSet(int oracleSetHash, address[] memory newOracles, Signature[] memory signatures) override  public {
       bytes32 _id = getNewSetId(oracleSetHash, newOracles);
+      require(newOracles.length > 2, "New set is too short");
       uint countedVotes = generalVote(_id, signatures);
-      if( countedVotes >= 2 * oraclesSet.length / 3 && !finishedVotings[_id]) {
-          updateOracleSet(newOracles);
+      if( countedVotes >= 2 * oraclesSet.length / 3) {
+          updateOracleSet(oracleSetHash, newOracles);
           finishedVotings[_id] = true;
       }
     }
@@ -64,7 +66,7 @@ contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
       mint(data);
     }
 
-    function updateOracleSet(address[] memory newSet) internal {
+    function updateOracleSet(int oracleSetHash, address[] memory newSet) internal {
       uint oldSetLen = oraclesSet.length;
       for(uint i = 0; i < oldSetLen; i++) {
         isOracle[oraclesSet[i]] = false;
@@ -75,7 +77,7 @@ contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
         require(!isOracle[newSet[i]], "Duplicate oracle in Set");
         isOracle[newSet[i]] = true;
       }
-      emit NewOracleSet(newSet);
+      emit NewOracleSet(oracleSetHash, newSet);
     }
     function getFullOracleSet() public view returns (address[] memory) {
         return oraclesSet;
