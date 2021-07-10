@@ -55,7 +55,7 @@ contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
     function voteForSwitchBurn(bool newBurnStatus, int nonce, Signature[] memory signatures) override public {
       bytes32 _id = getNewBurnStatusId(newBurnStatus, nonce);
       uint countedVotes = generalVote(_id, signatures);
-      if( countedVotes >= 2 * oraclesSet.length / 3 && !finishedVotings[_id]) {
+      if( countedVotes >= 2 * oraclesSet.length / 3) {
           allowBurn = newBurnStatus;
           finishedVotings[_id] = true;
       }
