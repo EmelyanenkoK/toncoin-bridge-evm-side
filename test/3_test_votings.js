@@ -42,6 +42,7 @@ contract("Bridge", ([oracle1, not_oracle, oracle2, oracle3, oracle4, oracle5]) =
       balance.toString().should.be.equal(String(1e9));
       let isFinished = await bridge.finishedVotings(utils.hashData(utils.encodeSwapData(data)));
       isFinished.should.be.true;
+      await bridge.voteForMinting(data, signatureSet, { from: oracle1 }).should.be.rejected;
     });
     it("check duplications in signature set", async () => {
       let user = oracle5;
@@ -52,6 +53,7 @@ contract("Bridge", ([oracle1, not_oracle, oracle2, oracle3, oracle4, oracle5]) =
       signatureSet = [await utils.signData(data, oracle1),
                           await utils.signData(data, oracle2),
                           await utils.signData(data, oracle1)];
+      await bridge.voteForMinting(data, signatureSet, { from: oracle1 }).should.be.rejected;
     });
 
     it("check unsorted signature set", async () => {
