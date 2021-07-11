@@ -43,57 +43,18 @@ contract("Bridge", ([oracle1, not_oracle, oracle2, oracle3, oracle4, oracle5]) =
       let isFinished = await bridge.finishedVotings(utils.hashData(utils.encodeSwapData(data)));
       isFinished.should.be.true;
     });
-    it("check replay against the same swap and signature set", async () => {
+    it("check duplications in signature set", async () => {
       let user = oracle5;
       let data = utils.prepareSwapData(user, 1e9);
-      let initialBalance = await bridge.balanceOf(user);
-      let receivedVotes = await bridge.receivedVotes(utils.hashData(utils.encodeSwapData(data)));
-      receivedVotes.toString().should.be.equal("2");
       let signatureSet = [await utils.signData(data, oracle1),
-                          await utils.signData(data, oracle2)];
+                          await utils.signData(data, oracle1)];
       await bridge.voteForMinting(data, signatureSet, { from: oracle1 }).should.be.rejected;
-      let finalBalance = await bridge.balanceOf(user);
-      (finalBalance-initialBalance).toString().should.be.equal(String(0));
-      receivedVotes = await bridge.receivedVotes(utils.hashData(utils.encodeSwapData(data)));
-      receivedVotes.toString().should.be.equal("2");
-    });
-    it("check replay against the same swap, but different signature set", async () => {
-      let user = oracle5;
-      let data = utils.prepareSwapData(user, 1e9);
-      let initialBalance = await bridge.balanceOf(user);
-      let receivedVotes = await bridge.receivedVotes(utils.hashData(utils.encodeSwapData(data)));
-      receivedVotes.toString().should.be.equal("2");
-      let signatureSet = [await utils.signData(data, oracle2),
-                          await utils.signData(data, oracle3)];
-      await bridge.voteForMinting(data, signatureSet, { from: oracle1 }).should.be.rejected;
-      let finalBalance = await bridge.balanceOf(user);
-      (finalBalance-initialBalance).toString().should.be.equal(String(0));
-      receivedVotes = await bridge.receivedVotes(utils.hashData(utils.encodeSwapData(data)));
-      //receivedVotes.toString().should.be.equal("3");
+      signatureSet = [await utils.signData(data, oracle1),
+                          await utils.signData(data, oracle2),
+                          await utils.signData(data, oracle1)];
     });
 
-    it("oracles can mint tokens by aggregating signatures onchain", async () => {
-      let user = oracle5;
-      let data = utils.prepareSwapData(user, 2e9);
-      let initialBalance = await bridge.balanceOf(user);
-      let receivedVotes = await bridge.receivedVotes(utils.hashData(utils.encodeSwapData(data)));
-      receivedVotes.toString().should.be.equal("0");
-      let signatureSet1 = [await utils.signData(data, oracle1)];
-      await bridge.voteForMinting(data, signatureSet1, { from: oracle1 }).should.be.fulfilled;
-      let middleBalance = await bridge.balanceOf(user);
-      (middleBalance-initialBalance).toString().should.be.equal(String(0));
-      let isFinished = await bridge.finishedVotings(utils.hashData(utils.encodeSwapData(data)));
-      isFinished.should.not.be.true;
-      receivedVotes = await bridge.receivedVotes(utils.hashData(utils.encodeSwapData(data)));
-      receivedVotes.toString().should.be.equal("1");
-      let signatureSet2 = [await utils.signData(data, oracle2),
-                           await utils.signData(data, oracle3)];
-      await bridge.voteForMinting(data, signatureSet2, { from: not_oracle }).should.be.fulfilled;
-      let finalBalance = await bridge.balanceOf(user);
-      (finalBalance-initialBalance).toString().should.be.equal(String(2e9));
-      receivedVotes = await bridge.receivedVotes(utils.hashData(utils.encodeSwapData(data)));
-      receivedVotes.toString().should.be.equal("3");
-    });
+
   });
 
   describe("WrappedTON::oracles_rotation", () => {
