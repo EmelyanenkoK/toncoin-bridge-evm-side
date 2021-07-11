@@ -7,14 +7,20 @@ let Bridge = artifacts.require("Bridge");
 
 let sigchecker;
 
+
+const TON_WORKCHAIN = -1;
+const TON_ADDRESS_HASH = '0x2175818712088C0A5F087DF2594A41CB5CB29689EB60FC59F6848D752AF11498';
+const TON_TX_HASH = '0x6C79A5432D988FFAD699E60C4A6E9C7E191CBE5A1BD199294C1F3361D0893359';
+const TON_TX_LT = 19459352000003;
+
 contract("SignatureChecker", ([oracle, not_oracle]) => {
   describe("SignatureChecker::instance", async () => {
     sigchecker = await Bridge.deployed("Wrapped TON Coin", "TONCOIN", [oracle]);
   });
   describe("SignatureChecker::checks",  () => {
     let prepareSwapData = function(receiver, amount, 
-                                   tonaddress={workchain:-1, address_hash:"0x00"}, 
-                                   tx_hash="0x00", lt=0) {
+                                   tonaddress={workchain: TON_WORKCHAIN, address_hash: TON_ADDRESS_HASH},
+                                   tx_hash=TON_TX_HASH, lt=TON_TX_LT) {
        return {
          receiver:receiver,
          amount:amount,

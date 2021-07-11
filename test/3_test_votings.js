@@ -7,10 +7,15 @@ let Bridge = artifacts.require("Bridge");
 
 let bridge;
 
+const TON_WORKCHAIN = -1;
+const TON_ADDRESS_HASH = '0x2175818712088C0A5F087DF2594A41CB5CB29689EB60FC59F6848D752AF11498';
+const TON_TX_HASH = '0x6C79A5432D988FFAD699E60C4A6E9C7E191CBE5A1BD199294C1F3361D0893359';
+const TON_TX_LT = 19459352000003;
+
 // Helpers TODO: move to module
     let prepareSwapData = function(receiver, amount, 
-                                   tonaddress={workchain:-1, address_hash:"0x00"}, 
-                                   tx_hash="0x00", lt=0) {
+                                   tonaddress={workchain:TON_WORKCHAIN, address_hash:TON_ADDRESS_HASH},
+                                   tx_hash=TON_TX_HASH, lt=TON_TX_LT) {
        return {
          receiver:receiver,
          amount:amount,
@@ -212,26 +217,26 @@ contract("Bridge", ([oracle1, not_oracle, oracle2, oracle3, oracle4, oracle5]) =
       let signatureSet = [await signBurnStatus(1, 13, oracle4),
                           await signBurnStatus(1, 13, oracle5)];
       await bridge.voteForSwitchBurn(1, 13, signatureSet, { from: oracle1 }).should.be.fulfilled;
-      await bridge.burn("1", {workchain:-1, address_hash:"0x00"}, { from: user }).should.be.fulfilled;
+      await bridge.burn("1", {workchain: TON_WORKCHAIN, address_hash: TON_ADDRESS_HASH}, { from: user }).should.be.fulfilled;
     });
     it("check replay protection", async () => {
       let user = oracle5;
       let signatureSet = [await signBurnStatus(0, 12, oracle4),
                           await signBurnStatus(0, 12, oracle5)];
       await bridge.voteForSwitchBurn(0, 12, signatureSet, { from: oracle1 }).should.be.fulfilled;
-      await bridge.burn("1", {workchain:-1, address_hash:"0x00"}, { from: user }).should.be.rejected;
+      await bridge.burn("1", {workchain: TON_WORKCHAIN, address_hash: TON_ADDRESS_HASH}, { from: user }).should.be.rejected;
 
       signatureSet = [await signBurnStatus(1, 14, oracle4),
                           await signBurnStatus(1, 14, oracle5)];
       await bridge.voteForSwitchBurn(1, 14, signatureSet, { from: oracle1 }).should.be.fulfilled;
-      await bridge.burn("1", {workchain:-1, address_hash:"0x00"}, { from: user }).should.be.fulfilled;
+      await bridge.burn("1", {workchain: TON_WORKCHAIN, address_hash: TON_ADDRESS_HASH}, { from: user }).should.be.fulfilled;
 
       signatureSet = [await signBurnStatus(0, 12, oracle4),
                           await signBurnStatus(0, 12, oracle5)];
       await bridge.voteForSwitchBurn(0, 12, signatureSet, { from: oracle1 }).should.be.rejected;
       let isBurnAllowed = await bridge.allowBurn();
       isBurnAllowed.should.be.true;
-      await bridge.burn("1", {workchain:-1, address_hash:"0x00"}, { from: user }).should.be.fulfilled;
+      await bridge.burn("1", {workchain: TON_WORKCHAIN, address_hash: TON_ADDRESS_HASH}, { from: user }).should.be.fulfilled;
     });
 
   });
