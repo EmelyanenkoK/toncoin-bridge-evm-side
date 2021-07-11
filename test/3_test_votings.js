@@ -176,6 +176,12 @@ contract("Bridge", ([oracle1, not_oracle, oracle2, oracle3, oracle4, oracle5]) =
       let signatureSet = [await signSet(13, newSet, oracle1),
                           await signSet(13, newSet, oracle2)];
       await bridge.voteForNewOracleSet(13, newSet, signatureSet, { from: oracle1 }).should.be.fulfilled;
+
+      await bridge.voteForNewOracleSet(14, newSet, [await signSet(14, newSet, oracle1),
+          await signSet(14, newSet, oracle2)], { from: oracle1 }).should.be.rejected;
+
+      await bridge.voteForNewOracleSet(14, newSet, [await signSet(14, newSet, oracle3),
+          await signSet(14, newSet, oracle5)], { from: oracle1 }).should.be.fulfilled;
     });
     it("check correctness of new set", async () => {
       // list
