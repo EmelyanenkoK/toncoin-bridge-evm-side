@@ -138,6 +138,7 @@ contract("WrappedTON", ([single_oracle, not_oracle, user, user2, user3]) => {
     });
 
     it("user 3 cant burn tokens", async () => {
+      await token.voteForSwitchBurn(true, 42, [await signBurnStatus(true, 42, single_oracle)], { from: not_oracle }).should.be.fulfilled;
       await token.burn("1000", {workchain: TON_WORKCHAIN, address_hash: TON_ADDRESS_HASH}, { from: user3 }).should.be.rejected;
       let finalBalance = await token.balanceOf(user3);
       finalBalance.toString().should.be.equal("0");
@@ -146,6 +147,20 @@ contract("WrappedTON", ([single_oracle, not_oracle, user, user2, user3]) => {
     it("user2 can burn tokens on behalf of user", async () => {
       await token.approve(user2, "1200", { from: user });
       let initialBalance = await token.balanceOf(user);
+
+      await token.voteForSwitchBurn(false, 43, [await signBurnStatus(false, 43, single_oracle)], { from: not_oracle }).should.be.fulfilled;
+
+      await token.burnFrom(user, "1100", {workchain: TON_WORKCHAIN, address_hash: TON_ADDRESS_HASH}, { from: user2 }).should.be
+          .rejected;
+
+      await token.voteForSwitchBurn(true, 44, [await signBurnStatus(true, 44, single_oracle)], { from: not_oracle }).should.be.fulfilled;
+
+      await token.burnFrom(user3, "1100", {workchain: TON_WORKCHAIN, address_hash: TON_ADDRESS_HASH}, { from: user2 }).should.be
+        .rejected;
+      await token.approve(user2, "1200", { from: user3 });
+      await token.burnFrom(user3, "1100", {workchain: TON_WORKCHAIN, address_hash: TON_ADDRESS_HASH}, { from: user2 }).should.be
+          .rejected;
+
       await token.burnFrom(user, "1100", {workchain: TON_WORKCHAIN, address_hash: TON_ADDRESS_HASH}, { from: user2 }).should.be
         .fulfilled;
       let allowance = await token.allowance(user, user2);
