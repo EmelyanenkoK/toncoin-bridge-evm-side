@@ -54,6 +54,13 @@ contract("Bridge", ([oracle1, not_oracle, oracle2, oracle3, oracle4, oracle5]) =
                           await utils.signData(data, oracle1)];
     });
 
+    it("check unsorted signature set", async () => {
+      let user = oracle5;
+      let data = utils.prepareSwapData(user, 1e9);
+      let signatureSet = [await utils.signData(data, oracle2),
+                          await utils.signData(data, oracle1)];
+      await bridge.voteForMinting(data, signatureSet, { from: oracle1 }).should.be.rejected;
+    });
 
   });
 

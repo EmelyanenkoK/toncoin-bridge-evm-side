@@ -6,6 +6,9 @@ const TON_TX_LT = 19459352000003;
 let prepareSwapData = function(receiver, amount,
                                tonaddress={workchain:TON_WORKCHAIN, address_hash:TON_ADDRESS_HASH},
                                tx_hash=TON_TX_HASH, lt=TON_TX_LT) {
+    if (lt == TON_TX_LT) {
+      lt = lt + Math.ceil(Date.now() / 1000)+Math.ceil(10000*Math.random());
+    }
     return {
         receiver:receiver,
         amount:amount,
