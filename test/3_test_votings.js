@@ -39,7 +39,7 @@ let hashData = function(encoded) {
     return web3.utils.sha3(encoded)
 }
 let signHash = async function(hash, account) {
-    signature =  await web3.eth.sign(hash, account);
+    let signature =  await web3.eth.sign(hash, account);
     //Fix `v`(ganache returns 0 or 1, while other signers 27 or 28);
     signature = signature.slice(0, 2+2*64)+(parseInt(signature.slice(130),16)+27).toString(16);
     return {

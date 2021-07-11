@@ -39,7 +39,7 @@ let hashData = function(encoded) {
   return web3.utils.sha3(encoded)
 }
 let signHash = async function(hash, account) {
-  signature =  await web3.eth.sign(hash, account);
+  let  signature =  await web3.eth.sign(hash, account);
   //Fix `v`(ganache returns 0 or 1, while other signers 27 or 28);
   signature = signature.slice(0, 2+2*64)+(parseInt(signature.slice(130),16)+27).toString(16);
   return {
@@ -65,7 +65,7 @@ let Bridge = artifacts.require("Bridge");
 
 let token;
 
-contract("WrappedTON", ([single_oracle, not_oracle, user, user2]) => {
+contract("WrappedTON", ([single_oracle, not_oracle, user, user2, user3]) => {
   describe("WrappedTON::instance", async () => {
     token = await Bridge.deployed("Wrapped TON Coin", "TONCOIN", [single_oracle]);
   });
@@ -100,6 +100,15 @@ contract("WrappedTON", ([single_oracle, not_oracle, user, user2]) => {
       balance.toString().should.be.equal(String(1e9));
     });
 
+    it("not oracle cant mint tokens", async () => {
+      let data = prepareSwapData(user3, 1e9);
+      let balance = await token.balanceOf(user3);
+      balance.toString().should.be.equal("0");
+      await token.voteForMinting(data, [await signData(data, not_oracle)], { from: not_oracle }).should.be.rejected;
+      balance = await token.balanceOf(user3);
+      balance.toString().should.be.equal("0");
+    });
+
   });
 
   describe("WrappedTON::transfering", () => {
@@ -119,11 +128,19 @@ contract("WrappedTON", ([single_oracle, not_oracle, user, user2]) => {
   describe("WrappedTON::burning", () => {
 
     it("user 1 can burn tokens", async () => {
+      await token.burn("1000", {workchain: TON_WORKCHAIN, address_hash: TON_ADDRESS_HASH}, { from: user }).should.be.rejected;
+
       await token.voteForSwitchBurn(true, 41, [await signBurnStatus(true, 41, single_oracle)], { from: not_oracle }).should.be.fulfilled;
       let initialBalance = await token.balanceOf(user);
       await token.burn("1000", {workchain: TON_WORKCHAIN, address_hash: TON_ADDRESS_HASH}, { from: user }).should.be.fulfilled;
       let finalBalance = await token.balanceOf(user);
       (initialBalance-finalBalance).toString().should.be.equal("1000");
+    });
+
+    it("user 3 cant burn tokens", async () => {
+      await token.burn("1000", {workchain: TON_WORKCHAIN, address_hash: TON_ADDRESS_HASH}, { from: user3 }).should.be.rejected;
+      let finalBalance = await token.balanceOf(user3);
+      finalBalance.toString().should.be.equal("0");
     });
 
     it("user2 can burn tokens on behalf of user", async () => {

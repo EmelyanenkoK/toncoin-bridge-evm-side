@@ -39,7 +39,7 @@ let hashData = function(encoded) {
   return web3.utils.sha3(encoded)
 }
 let signHash = async function(hash, account) {
-  signature =  await web3.eth.sign(hash, account);
+  let signature =  await web3.eth.sign(hash, account);
   //Fix `v`(ganache returns 0 or 1, while other signers 27 or 28);
   signature = signature.slice(0, 2+2*64)+(parseInt(signature.slice(130),16)+27).toString(16);
   return {
@@ -98,6 +98,11 @@ contract("SignatureChecker", ([oracle, not_oracle]) => {
       let set = [oracle, not_oracle, oracle];
       let hash = hashData(encodeSet(7, set));
       let contractHash = await sigchecker.getNewSetId(7, set);
+      contractHash.toString().should.be.equal(String(hash));
+    });
+    it("check correct newBurnStatus id generation", async () => {
+      let hash = hashData(encodeBurnStatus(true, 7));
+      let contractHash = await sigchecker.getNewBurnStatusId(true, 7);
       contractHash.toString().should.be.equal(String(hash));
     });
   });
