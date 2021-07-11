@@ -15,7 +15,8 @@ contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
         updateOracleSet(0, initialSet);
     }
     
-    function generalVote(bytes32 digest, Signature[] memory signatures) internal returns (uint countedVotes){
+    function generalVote(bytes32 digest, Signature[] memory signatures) internal {
+      require(signatures.length >= 2 * oraclesSet.length / 3, "Not enough signatures");
       require(!finishedVotings[digest], "Vote is already finished");
       uint signum = signatures.length;
       uint last_signer = 0;
@@ -26,37 +27,27 @@ contract Bridge is SignatureChecker, BridgeInterface, WrappedTON {
         require(next_signer > last_signer, "Signatures are not sorted");
         last_signer = next_signer;
         checkSignature(digest, signatures[i]);
-        countedVotes += 1;
       }
+      finishedVotings[digest] = true;
     }
 
     function voteForMinting(SwapData memory data, Signature[] memory signatures) override public {
       bytes32 _id = getSwapDataId(data);
-      uint countedVotes = generalVote(_id, signatures);
-      if( countedVotes >= 2 * oraclesSet.length / 3) {
-          executeMinting(data);
-          finishedVotings[_id] = true;
-      }
+      generalVote(_id, signatures);
+      executeMinting(data);
     }
 
     function voteForNewOracleSet(int oracleSetHash, address[] memory newOracles, Signature[] memory signatures) override  public {
       bytes32 _id = getNewSetId(oracleSetHash, newOracles);
       require(newOracles.length > 2, "New set is too short");
-      uint countedVotes = generalVote(_id, signatures);
-      if( countedVotes >= 2 * oraclesSet.length / 3) {
-          updateOracleSet(oracleSetHash, newOracles);
-          finishedVotings[_id] = true;
-      }
+      generalVote(_id, signatures);
+      updateOracleSet(oracleSetHash, newOracles);
     }
 
     function voteForSwitchBurn(bool newBurnStatus, int nonce, Signature[] memory signatures) override public {
       bytes32 _id = getNewBurnStatusId(newBurnStatus, nonce);
-      uint countedVotes = generalVote(_id, signatures);
-      if( countedVotes >= 2 * oraclesSet.length / 3) {
-          allowBurn = newBurnStatus;
-          finishedVotings[_id] = true;
-      }
-
+      generalVote(_id, signatures);
+      allowBurn = newBurnStatus;
     }
 
     function executeMinting(SwapData memory data) internal {
