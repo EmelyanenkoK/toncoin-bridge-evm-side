@@ -43,13 +43,14 @@ contract SignatureChecker is TonUtils {
 
     function getSwapDataId(SwapData memory data)
         public
-        pure
+        view
         returns (bytes32 result)
     {
         result = 
             keccak256(
                 abi.encode(
                     0xDA7A,
+                    address(this),
                     data.receiver,
                     data.amount,
                     data.tx.address_.workchain,
@@ -62,13 +63,14 @@ contract SignatureChecker is TonUtils {
 
     function getNewSetId(int oracleSetHash, address[] memory set)
         public
-        pure
+        view
         returns (bytes32 result)
     {
         result = 
             keccak256(
                 abi.encode(
                     0x5e7,
+                    address(this),
                     oracleSetHash,
                     set                    
                 )
@@ -77,13 +79,14 @@ contract SignatureChecker is TonUtils {
 
     function getNewBurnStatusId(bool newBurnStatus, int nonce)
         public
-        pure
+        view
         returns (bytes32 result)
     {
         result =
             keccak256(
                 abi.encode(
                     0xB012,
+                    address(this),
                     newBurnStatus,
                     nonce
                 )

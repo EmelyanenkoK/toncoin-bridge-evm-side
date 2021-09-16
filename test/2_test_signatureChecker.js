@@ -36,18 +36,18 @@ contract("SignatureChecker", ([oracle, not_oracle]) => {
     });
     it("check correct swapData id generation", async () => {
       let data = utils.prepareSwapData(not_oracle, 10);
-      let hash = utils.hashData(utils.encodeSwapData(data));
+      let hash = utils.hashData(utils.encodeSwapData(data, sigchecker.address));
       let contractHash = await sigchecker.getSwapDataId(data);
       contractHash.toString().should.be.equal(String(hash));
     });
     it("check correct oracleSet id generation", async () => {
       let set = [oracle, not_oracle, oracle];
-      let hash = utils.hashData(utils.encodeSet(7, set));
+      let hash = utils.hashData(utils.encodeSet(7, set, sigchecker.address));
       let contractHash = await sigchecker.getNewSetId(7, set);
       contractHash.toString().should.be.equal(String(hash));
     });
     it("check correct newBurnStatus id generation", async () => {
-      let hash = utils.hashData(utils.encodeBurnStatus(true, 7));
+      let hash = utils.hashData(utils.encodeBurnStatus(true, 7, sigchecker.address));
       let contractHash = await sigchecker.getNewBurnStatusId(true, 7);
       contractHash.toString().should.be.equal(String(hash));
     });

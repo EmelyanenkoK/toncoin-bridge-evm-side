@@ -19,16 +19,17 @@ let prepareSwapData = function(receiver, amount,
         }
     }
 };
-let encodeSwapData = function(d) {
-    return web3.eth.abi.encodeParameters(['int', 'address', 'uint256', 'int8', 'bytes32', 'bytes32', 'uint64'],
-        [0xDA7A, d.receiver, d.amount, d.tx.address_.workchain, d.tx.address_.address_hash, d.tx.tx_hash, d.tx.lt]);
+let encodeSwapData = function(d, target) {
+    console.log([0xDA7A, target, d.receiver, d.amount, d.tx.address_.workchain, d.tx.address_.address_hash, d.tx.tx_hash, d.tx.lt]);
+    return web3.eth.abi.encodeParameters(['int', 'address', 'address', 'uint256', 'int8', 'bytes32', 'bytes32', 'uint64'],
+        [0xDA7A, target, d.receiver, d.amount, d.tx.address_.workchain, d.tx.address_.address_hash, d.tx.tx_hash, d.tx.lt]);
 }
-let encodeSet = function(setHash, set) {
-    return web3.eth.abi.encodeParameters(['int', 'int', 'address[]'], [0x5E7, setHash, set]);
+let encodeSet = function(setHash, set, target) {
+    return web3.eth.abi.encodeParameters(['int', 'address', 'int', 'address[]'], [0x5E7, target, setHash, set]);
 }
 
-let encodeBurnStatus = function(burnStatus, nonce) {
-    return web3.eth.abi.encodeParameters(['int', 'bool', 'int'], [0xB012, burnStatus, nonce]);
+let encodeBurnStatus = function(burnStatus, nonce, target) {
+    return web3.eth.abi.encodeParameters(['int', 'address', 'bool', 'int'], [0xB012, target, burnStatus, nonce]);
 }
 
 let hashData = function(encoded) {
@@ -43,14 +44,14 @@ let signHash = async function(hash, account) {
         signature: signature
     }
 };
-let signData = async function(swapData, account) {
-    return await signHash(hashData(encodeSwapData(swapData)), account);
+let signData = async function(swapData, account, target) {
+    return await signHash(hashData(encodeSwapData(swapData, target)), account);
 };
-let signSet = async function(setHash, newSet, account) {
-    return await signHash(hashData(encodeSet(setHash, newSet)), account);
+let signSet = async function(setHash, newSet, account, target) {
+    return await signHash(hashData(encodeSet(setHash, newSet, target)), account);
 };
-let signBurnStatus = async function(burnStatus, nonce, account) {
-    return await signHash(hashData(encodeBurnStatus(burnStatus, nonce)), account);
+let signBurnStatus = async function(burnStatus, nonce, account, target) {
+    return await signHash(hashData(encodeBurnStatus(burnStatus, nonce, target)), account);
 };
 
 module.exports = Object({
